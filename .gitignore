@@ -1,0 +1,9 @@
+/.idea
+/var/log/
+/var/data/*.*
+!/var/data/.gitkeep
+/var/data/mysql/*
+!/var/data/mysql/.gitkeep
+/var/data/elasticsearch/*
+!/var/data/elasticsearch/.gitkeep
+.DS_Store

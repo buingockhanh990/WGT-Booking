@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./config/ssl:/etc/ssl
+      - ./web:/var/www/html:cached
+      - ./config/nginx/project.conf:/etc/nginx/conf.d/default.conf
+      - ./config/nginx/magento.conf:/etc/nginx/magento.conf
+      - ./var/log/nginx:/var/log/nginx
+    depends_on:
+      - php
+
+  php:
+    build:
+      context: ./config/php
+    hostname: php-fpm
+    ports:
+      - "35729:35729"
+    volumes:
+      - ./web:/var/www/html:cached
+      - ./config/php/php.ini:/usr/local/etc/php/conf.d/php.ini
+    working_dir: /var/www/html
+    user: 'www-data'
+
+#  cron:
+#    build:
+#      context: ./config/cron
+#    volumes:
+#      - ./web:/var/www/html:cached
+#    working_dir: /var/www/html
+#    user: 'www-data'
+
+  mysql:
+    image: mysql:8.0
+    hostname: mysql
+    ports:
+      - "6600:3306"
+    volumes:
+      - ./var/data/mysql:/var/lib/mysql:cached
+      - ./config/mysql/my.cnf:/etc/my.cnf
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+
+#  elasticsearch:
+#    image: elasticsearch:7.17.1
+#    hostname: elasticsearch
+#    volumes:
+#      - elasticsearch-data:/usr/share/elasticsearch/data
+#    environment:
+#      - discovery.type=single-node
+#      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+
+  redis:
+    image: redis:6.0
+    hostname: redis
+
+  #  varnish:
+  #    image: varnish:6.5
+  #    hostname: varnish
+
+  maildev:
+    image: maildev/maildev
+    hostname: maildev
+    ports:
+      - "1080:80"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "1081:80"
+    environment:
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+
+#volumes:
+#  elasticsearch-data:
+#    driver: local
+#    driver_opts:
+#      type: 'none'
+#      o: 'bind'
+#      device: './var/data/elasticsearch'
